@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: tcs-mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ""
+      MONGO_INITDB_ROOT_PASSWORD: ""
+
+  app:
+    build: .
+    container_name: tcs-vuln-api
+    restart: unless-stopped
+    ports:
+      - "5001:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017
+      - DB_NAME=tcs_vuln_db
+      - COLLECTION_NAME=vuln_testcases
+      - FLASK_ENV=production
+    depends_on:
+      - mongo
+    volumes:
+      - .:/app
+
+volumes:
+  mongo_data:
