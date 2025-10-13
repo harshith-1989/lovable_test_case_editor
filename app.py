@@ -5,6 +5,8 @@ from flasgger import Swagger
 from api.routes import bp as api_bp
 from utils.db import get_client
 from werkzeug.exceptions import HTTPException
+from flask import Flask
+from flask_cors import CORS
 
 def create_app():
     app = Flask(__name__)
@@ -13,6 +15,14 @@ def create_app():
         "uiversion": 3
     }
     Swagger(app)
+
+    allowed_origins = [
+        "http://localhost:8080",
+        "https://your-production-domain.com"
+    ]
+
+    # Allow requests only from your React app (secure)
+    CORS(app, resources={r"/api/*": {"origins": allowed_origins}})
 
     # register blueprint
     app.register_blueprint(api_bp)
