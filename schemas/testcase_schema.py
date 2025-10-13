@@ -1,7 +1,7 @@
 # schemas/testcase_schema.py
 from marshmallow import Schema, fields, validates, ValidationError, pre_load
 
-PLATFORMS = {"LLM": "LLM", "WEB": "web", "MOBILE": "mobile", "API": "API"}
+PLATFORMS = {"LLM": "LLM", "WEB": "Web", "MOBILE": "Mobile", "API": "API"}
 
 def normalize_platform(value):
     if not isinstance(value, str):
