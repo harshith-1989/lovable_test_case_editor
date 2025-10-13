@@ -41,9 +41,9 @@ class TestCaseSchema(Schema):
     description = fields.Str(required=False)
     recommendation = fields.Str(required=False)
     example = fields.Str(required=False)
-    cvss_score = fields.Float(required=False, allow_none=True)
-    Automated = fields.Raw(required=False, allow_none=True)
-
+    cvss_score = fields.Str(required=False, allow_none=True)
+    automated = fields.Raw(required=False, allow_none=True)
+    severity = fields.Str(required=False)
     @pre_load
     def normalize(self, data, **kwargs):
         # normalize platform if present
@@ -53,9 +53,9 @@ class TestCaseSchema(Schema):
             data["Automated"] = normalize_automated(data["Automated"])
         return data
 
-    @validates("cvss_score")
-    def validate_cvss(self, value):
-        if value is None:
-            return
-        if not (0.0 <= float(value) <= 10.0):
-            raise ValidationError("cvss_score must be between 0.0 and 10.0")
+    # @validates("cvss_score")
+    # def validate_cvss(self, value):
+    #     if value is None or "":
+    #         return
+    #     if not (0.0 <= float(value) <= 10.0):
+    #         raise ValidationError("cvss_score must be between 0.0 and 10.0")
