@@ -5,9 +5,13 @@ from flasgger import Swagger
 from api.routes import bp as api_bp
 from utils.db import get_client
 from werkzeug.exceptions import HTTPException
+from flask import Flask
+from flask_cors import CORS
 
 def create_app():
     app = Flask(__name__)
+    # Allow requests only from your React app (secure)
+    CORS(app, resources={r"/api/*": {"origins": "http://localhost:8080"}})
     app.config["SWAGGER"] = {
         "title": "TCS Vulnerability Testcases API",
         "uiversion": 3
