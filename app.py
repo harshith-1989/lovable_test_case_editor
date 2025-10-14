@@ -18,6 +18,14 @@ def create_app():
     }
     Swagger(app)
 
+    allowed_origins = [
+        "http://localhost:8080",
+        "https://your-production-domain.com"
+    ]
+
+    # Allow requests only from your React app (secure)
+    CORS(app, resources={r"/api/*": {"origins": allowed_origins}})
+
     # register blueprint
     app.register_blueprint(api_bp)
 
