@@ -2,8 +2,13 @@
 from flask import Blueprint, request, jsonify, current_app
 from pymongo import errors
 from bson import json_util
-from schemas.testcase_schema import TestCaseSchema
+from schemas.testcase_schema import TestCaseSchema, GenerateSchema, ValidationError
 from utils.db import get_collection
+from utils.logger import get_logger
+
+logger = get_logger("APIs")
+# Import from modular AI helper
+from api.prompt_manager import PromptManager, GeminiClient, extract_json
 
 bp = Blueprint("api", __name__, url_prefix="/api/v1")
 schema = TestCaseSchema()
@@ -206,3 +211,89 @@ def delete_test_cases():
         return jsonify({"deleted_count": res.deleted_count}), 200
     except errors.PyMongoError:
         return jsonify({"error": "Database delete error"}), 500
+
+
+# ------------------------------------------------------------------------------
+# 🚀 Endpoint: /generate_metadata
+# ------------------------------------------------------------------------------
+
+@bp.route("/generate_metadata", methods=["POST"])
+def generate_metadata():
+    """
+   Generates OWASP/compliance metadata using Gemini LLM for a given vulnerability name and platform
+---
+tags:
+  - AI-Generated Metadata
+consumes:
+  - application/json
+produces:
+  - application/json
+parameters:
+  - name: body
+    in: body
+    required: true
+    schema:
+      type: object
+      properties:
+        vuln_name:
+          type: string
+          example: Prompt Injection
+        platform:
+          type: string
+          enum: [LLM, web, mobile, API]
+          example: LLM
+      required:
+        - vuln_name
+        - platform
+responses:
+  200:
+    description: Generated metadata successfully
+    schema:
+      $ref: '#/definitions/SecurityVulnerability'
+  400:
+    description: Invalid input payload
+  502:
+    description: LLM generation or JSON parsing error
+
+    """
+    payload = request.get_json(silent=True)
+    if not payload:
+        return jsonify({"error": "Invalid or missing JSON payload"}), 400
+    logger.info(f"Payload received: {payload}")
+    prompt_schema = GenerateSchema()
+    try:
+        validated = prompt_schema.load(payload)
+    except ValidationError as e:
+        return jsonify({"error": "validation_error", "messages": e.messages}), 400
+    logger.info(f"Schema validation successful")
+    vuln_name = validated["vuln_name"].strip()
+    platform = validated["platform"].strip()
+
+    try:
+        prompt = PromptManager().build_prompt(vuln_name, platform)
+        response = GeminiClient().generate(prompt)
+        logger.info(f"Prompt fed to LLM and received response: {response}")
+        if isinstance(response, str) or isinstance(response, bytes) or isinstance(response, bytearray):
+            parsed = extract_json(response)
+            if not parsed:
+                return jsonify({
+                    "error": "parse_failed",
+                    "message": "Gemini returned non-parsable output.",
+                    "raw_output": response
+                }), 502
+
+        parsed = response
+
+
+
+
+        if "@context" not in parsed:
+            parsed["@context"] = "https://schema.org/"
+        if "@type" not in parsed:
+            parsed["@type"] = "SecurityVulnerability"
+
+        return jsonify(parsed), 200
+
+    except Exception as e:
+        logger.exception("Generation failed")
+        return jsonify({"error": "generation_failed", "message": str(e)}), 502

@@ -1,6 +1,8 @@
 # schemas/testcase_schema.py
 from marshmallow import Schema, fields, validates, ValidationError, pre_load
+from utils.logger import get_logger
 
+logger = get_logger("Schema")
 PLATFORMS = {"LLM": "LLM", "WEB": "Web", "MOBILE": "Mobile", "API": "API"}
 
 def normalize_platform(value):
@@ -59,3 +61,20 @@ class TestCaseSchema(Schema):
     #         return
     #     if not (0.0 <= float(value) <= 10.0):
     #         raise ValidationError("cvss_score must be between 0.0 and 10.0")
+
+# ------------------------------------------------------------------------------
+# Input Schema
+# ------------------------------------------------------------------------------
+
+class GenerateSchema(Schema):
+    vuln_name = fields.Str(required=True)
+    platform = fields.Str(required=True)
+
+    @validates("platform")
+    def validate_platform(self, value, **kwargs):
+        allowed = {"LLM", "Web", "Mobile", "API"}
+
+        if value not in allowed:
+            logger.info(f"Not allowed: {value}")
+            raise ValidationError(f"platform must be one of {sorted(list(allowed))}")
+

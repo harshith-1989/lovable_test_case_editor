@@ -12,7 +12,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ""
       MONGO_INITDB_ROOT_PASSWORD: ""
-
+    networks:
+      - tcs_network
   app:
     build: .
     container_name: tcs-vuln-api
@@ -24,10 +25,22 @@ services:
       - DB_NAME=tcs_vuln_db
       - COLLECTION_NAME=vuln_testcases
       - FLASK_ENV=production
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=gemini-2.5-flash
+      - GEMINI_TIMEOUT_SECONDS=40
     depends_on:
       - mongo
     volumes:
       - .:/app
+    networks:
+      - tcs_network
+
+# ======================
+# Network and Volumes
+# ======================
+networks:
+  tcs_network:
+    driver: bridge
 
 volumes:
   mongo_data:

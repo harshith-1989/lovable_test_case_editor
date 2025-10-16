@@ -14,7 +14,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 ENV FLASK_ENV=production
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONUNBUFFERED=1 \
+    GEMINI_API_KEY=${GEMINI_API_KEY} \
+    GEMINI_MODEL=gemini-2.5-flash \
+    GEMINI_TIMEOUT_SECONDS=20
 
 EXPOSE 5000
 CMD ["gunicorn", "app:create_app()", "-b", "0.0.0.0:5000", "--workers", "3", "--threads", "2", "--timeout", "120"]

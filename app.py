@@ -42,7 +42,7 @@ def create_app():
     def handle_error(e):
         if isinstance(e, HTTPException):
             return jsonify({"error": e.description}), e.code
-        return jsonify({"error": "Internal server error"}), 500
+        return jsonify({"error": f"Internal server error: {e.description}"}), 500
 
     return app
 
