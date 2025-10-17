@@ -94,7 +94,7 @@ class GeminiClient:
             properties={
                 "@context": Schema(type="string", default="https://schema.org/"),
                 "@type": Schema(type="string", default="SecurityVulnerability"),
-                "owasp_ref": Schema(type="string", description="Platform-specific OWASP mapping."),
+                "owasp_ref": Schema(type="string", description="Platform-specific OWASP mapping(only one from the latest OWASP for the platform in the format OWASP top 10 <year>:<Mx for mobile or Ax for web/API or LLMx for LLM> - <top-10 name>)"),
                 "compliance": Schema(type="string", description="Applicable compliance frameworks like NIST, ISO."),
                 "vuln_abstract": Schema(type="string",
                                         description="Brief summary of the vulnerability and its potential impact."),
