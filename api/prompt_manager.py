@@ -50,7 +50,7 @@ class PromptManager:
 You are a senior cybersecurity analyst and GenAI engineer.
 
 Given the vulnerability/test-case name "{vuln_name}" and platform "{platform}",
-generate a concise, accurate, and structured JSON-LD object describing
+generate a concise, accurate, and structured JSON-LD object(with total_token_count strictly not exceeding 2000 tokens) describing
 the vulnerability and its associated metadata.
 
 Follow OWASP standards, NIST AI RMF, and ISO/IEC 5338:2023 when applicable.
@@ -94,7 +94,11 @@ class GeminiClient:
             properties={
                 "@context": Schema(type="string", default="https://schema.org/"),
                 "@type": Schema(type="string", default="SecurityVulnerability"),
-                "owasp_ref": Schema(type="string", description="Platform-specific OWASP mapping(only one from the latest OWASP for the platforms: 1)Web/API/LLM in the format OWASP top 10 <year>:<Ax for web/API or LLMx for LLM> - <top-10 name>). 2)Mobile in the format MASVS-<category>-<x>"),
+                "owasp_ref": Schema(type="string", description="Platform-specific OWASP mapping(only one from the "
+                                                               "latest OWASP for the platforms: 1)Web/API/LLM in the "
+                                                               "format OWASP top 10 <year>:<Ax for web/API or LLMx "
+                                                               "for LLM> - <top-10 name>). 2)Mobile_x(iOS or Android) in the format "
+                                                               "MASVS-<category>-<integer value from 0 to 9>"),
                 "compliance": Schema(type="string", description="Applicable compliance frameworks like NIST, ISO."),
                 "vuln_abstract": Schema(type="string",
                                         description="Brief summary of the vulnerability and its potential impact."),
@@ -117,7 +121,7 @@ class GeminiClient:
                 temperature=0.0,
                 response_mime_type="application/json",
                 response_schema=self.response_schema,
-                max_output_tokens=2000
+                max_output_tokens=2500
             )
 
             logger.info("Invoking Gemini with structured schema enforcement...")

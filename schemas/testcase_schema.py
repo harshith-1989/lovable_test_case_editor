@@ -3,7 +3,7 @@ from marshmallow import Schema, fields, validates, ValidationError, pre_load
 from utils.logger import get_logger
 
 logger = get_logger("Schema")
-PLATFORMS = {"LLM": "LLM", "WEB": "Web", "MOBILE": "Mobile", "API": "API"}
+PLATFORMS = {"LLM": "LLM", "WEB": "Web", "MOBILE_iOS": "Mobile_iOS", "MOBILE_ANDROID": "Mobile_Android", "API": "API"}
 
 def normalize_platform(value):
     if not isinstance(value, str):
@@ -72,7 +72,7 @@ class GenerateSchema(Schema):
 
     @validates("platform")
     def validate_platform(self, value, **kwargs):
-        allowed = {"LLM", "Web", "Mobile", "API"}
+        allowed = {"LLM", "Web", "Mobile_iOS", "Mobile_Android", "API"}
 
         if value not in allowed:
             logger.info(f"Not allowed: {value}")
